@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.media.MediaScannerConnection
 import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
@@ -39,7 +40,7 @@ object ImageGenerator {
         val content = withContext(Dispatchers.IO) { Repository(context).refresh() }
         val bing = withContext(Dispatchers.IO) { downloadBitmap(content.bingImageUrl) }
         val bmp = withContext(Dispatchers.Main) { renderToBitmap(context, content, bing) }
-        val file = withContext(Dispatchers.IO) { save(bmp) }
+        val file = withContext(Dispatchers.IO) { save(context, bmp) }
         bmp.recycle()
         bing?.recycle()
         return file
@@ -77,7 +78,7 @@ object ImageGenerator {
      * 写 PNG，保证 <1MB：PNG 无损，若超限就整体等比缩小重试（掌阅会自适应放大）。
      * 始终用同一文件名 daily.png，避免掌阅里选中的图失效。
      */
-    private fun save(src: Bitmap): File? {
+    private fun save(context: Context, src: Bitmap): File? {
         val dir = targetDir()
         if (!dir.exists() && !dir.mkdirs()) return null
         val file = targetFile()
@@ -92,6 +93,10 @@ object ImageGenerator {
             if (bmp !== src) bmp.recycle()
             if (size <= MAX_BYTES) {
                 file.writeBytes(bos.toByteArray())
+                // 通知系统媒体库，图库/文件管理器立即可见
+                MediaScannerConnection.scanFile(
+                    context, arrayOf(file.absolutePath), arrayOf("image/png"), null
+                )
                 return file
             }
             scale *= 0.85
