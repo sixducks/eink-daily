@@ -1,106 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 整页可滚动：上面是设置，下面是按设备比例(1264:1680)显示的预览，滚下去能看完整排版。 -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:orientation="vertical">
+    android:background="#FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnPerm"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/btn_perm" />
+            android:orientation="horizontal"
+            android:padding="12dp">
 
-        <Button
-            android:id="@+id/btnGenerate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:text="@string/btn_generate" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="4dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="历史来源："
-            android:textColor="#333333"
-            android:textSize="14sp" />
-
-        <RadioGroup
-            android:id="@+id/rgSource"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/rbBaidu"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/btnPerm"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="百度" />
+                android:layout_weight="1"
+                android:text="@string/btn_perm" />
 
-            <RadioButton
-                android:id="@+id/rbWiki"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/btnGenerate"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="维基(需梯子)" />
-        </RadioGroup>
-    </LinearLayout>
+                android:layout_weight="1"
+                android:text="@string/btn_generate" />
+        </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="4dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="历史来源："
+                android:textColor="#333333"
+                android:textSize="14sp" />
+
+            <RadioGroup
+                android:id="@+id/rgSource"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbBaidu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="百度" />
+
+                <RadioButton
+                    android:id="@+id/rbWiki"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="维基(需梯子)" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="每天刷新时间："
+                android:textColor="#333333"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="07:00" />
+        </LinearLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="每天刷新时间："
-            android:textColor="#333333"
-            android:textSize="14sp" />
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="8dp"
+            android:textColor="#666666"
+            android:textSize="13sp" />
 
-        <Button
-            android:id="@+id/btnTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="0dp"
-            android:text="07:00" />
+        <!-- 预览：高度在代码里按设备比例(1264:1680)设定；此处 500dp 仅为占位 -->
+        <include
+            android:id="@+id/preview"
+            layout="@layout/view_daily"
+            android:layout_width="match_parent"
+            android:layout_height="500dp" />
+
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="8dp"
-        android:textColor="#666666"
-        android:textSize="13sp" />
-
-    <!-- 复用待机图那套排版做实时预览 -->
-    <include
-        android:id="@+id/preview"
-        layout="@layout/view_daily"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-</LinearLayout>
+</ScrollView>

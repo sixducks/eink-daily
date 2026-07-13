@@ -47,12 +47,12 @@ object Renderer {
         tv.text = text
         val len = text.replace("\n", "").length
         val sizeSp = when {
-            len <= 16 -> 38f   // 短句/五绝一联
-            len <= 28 -> 34f   // 七绝
-            len <= 44 -> 29f
-            len <= 64 -> 25f   // 七律级
-            len <= 90 -> 21f
-            else -> 18f        // 超长慢词
+            len <= 16 -> 34f   // 短句/五绝一联
+            len <= 28 -> 30f   // 七绝
+            len <= 44 -> 26f
+            len <= 64 -> 22f   // 七律级
+            len <= 90 -> 19f
+            else -> 16f        // 超长慢词
         }
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
     }

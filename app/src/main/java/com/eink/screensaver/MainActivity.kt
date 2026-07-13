@@ -42,6 +42,16 @@ class MainActivity : AppCompatActivity() {
         preview = findViewById(R.id.preview)
         status = findViewById(R.id.tvStatus)
 
+        // 预览按设备真实比例(1264:1680)设定高度，放进可滚动页面能看到完整排版
+        preview.post {
+            val w = preview.width
+            if (w > 0) {
+                preview.layoutParams = preview.layoutParams.apply {
+                    height = (w * ImageGenerator.H.toDouble() / ImageGenerator.W).toInt()
+                }
+            }
+        }
+
         findViewById<Button>(R.id.btnPerm).setOnClickListener { requestAllFilesAccess() }
         findViewById<Button>(R.id.btnGenerate).setOnClickListener { generate() }
 
