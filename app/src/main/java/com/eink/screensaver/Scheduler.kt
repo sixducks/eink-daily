@@ -7,19 +7,39 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 object Scheduler {
 
+    private const val PREFS = "eink_daily"
+    private const val KEY_HOUR = "refresh_hour"
+    private const val KEY_MIN = "refresh_min"
     private const val PERIODIC_NAME = "eink_daily_periodic"
 
-    /** 每 6 小时刷新一次（跨天时会自动带上新的"历史上的今天"）。 */
+    const val DEFAULT_HOUR = 7
+    const val DEFAULT_MIN = 0
+
+    fun getHour(ctx: Context): Int = prefs(ctx).getInt(KEY_HOUR, DEFAULT_HOUR)
+    fun getMinute(ctx: Context): Int = prefs(ctx).getInt(KEY_MIN, DEFAULT_MIN)
+
+    /** 设定每天刷新时间并立即重排任务。 */
+    fun setTime(ctx: Context, hour: Int, minute: Int) {
+        prefs(ctx).edit().putInt(KEY_HOUR, hour).putInt(KEY_MIN, minute).apply()
+        scheduleDaily(ctx)
+    }
+
+    /**
+     * 每天在设定时间刷新一次。
+     * WorkManager 近似准点：设备休眠/无网时会顺延到下次醒来且联网时执行。
+     */
     fun scheduleDaily(context: Context) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        val req = PeriodicWorkRequestBuilder<DailyWorker>(6, TimeUnit.HOURS)
+        val req = PeriodicWorkRequestBuilder<DailyWorker>(24, TimeUnit.HOURS)
             .setConstraints(constraints)
+            .setInitialDelay(initialDelayMs(context), TimeUnit.MILLISECONDS)
             .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             PERIODIC_NAME,
@@ -38,4 +58,20 @@ object Scheduler {
             .build()
         WorkManager.getInstance(context).enqueue(req)
     }
+
+    /** 距离下一个"设定时间"的毫秒数（今天已过就排到明天）。 */
+    private fun initialDelayMs(context: Context): Long {
+        val now = Calendar.getInstance()
+        val next = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, getHour(context))
+            set(Calendar.MINUTE, getMinute(context))
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            if (!after(now)) add(Calendar.DAY_OF_MONTH, 1)
+        }
+        return next.timeInMillis - now.timeInMillis
+    }
+
+    private fun prefs(ctx: Context) =
+        ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 }

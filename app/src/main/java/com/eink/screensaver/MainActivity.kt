@@ -1,5 +1,6 @@
 package com.eink.screensaver
 
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -9,6 +10,7 @@ import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.eink.screensaver.data.Repository
@@ -42,6 +44,29 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnPerm).setOnClickListener { requestAllFilesAccess() }
         findViewById<Button>(R.id.btnGenerate).setOnClickListener { generate() }
+
+        // 历史来源单选：先按已保存值勾选，再挂监听（避免初始化就触发刷新）
+        val rg = findViewById<RadioGroup>(R.id.rgSource)
+        rg.check(
+            if (repo.getHistorySource() == Repository.SOURCE_WIKI) R.id.rbWiki else R.id.rbBaidu
+        )
+        rg.setOnCheckedChangeListener { _, id ->
+            repo.setHistorySource(
+                if (id == R.id.rbWiki) Repository.SOURCE_WIKI else Repository.SOURCE_BAIDU
+            )
+            refreshPreview()
+        }
+
+        // 每天刷新时间：点按弹出时间选择器
+        val btnTime = findViewById<Button>(R.id.btnTime)
+        renderRefreshTime(btnTime)
+        btnTime.setOnClickListener {
+            TimePickerDialog(this, { _, hh, mm ->
+                Scheduler.setTime(this, hh, mm)
+                renderRefreshTime(btnTime)
+                status.text = "已设为每天 %02d:%02d 刷新".format(hh, mm)
+            }, Scheduler.getHour(this), Scheduler.getMinute(this), true).show()
+        }
 
         // 打开先显示缓存，没有就拉一次填充预览
         val cached = repo.cached()
@@ -90,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         scope.launch {
             val file = ImageGenerator.generate(this@MainActivity)
             status.text = if (file != null)
-                "已生成：${file.absolutePath}\n去掌阅：设置→设备→屏幕显示→屏保→本地屏保，选中它。"
+                "已生成：${file.name}\n去掌阅：设置→设备→屏幕显示→屏保→本地屏保→选「轮播」。以后每天自动换新图。"
             else
                 "生成失败：检查网络与存储权限后重试。"
             // 同步刷新预览
@@ -101,6 +126,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun renderRefreshTime(btn: Button) {
+        btn.text = "%02d:%02d".format(Scheduler.getHour(this), Scheduler.getMinute(this))
     }
 
     private fun refreshPreview() {

@@ -68,27 +68,57 @@ class Repository(context: Context) {
         return Poem(fullPoem, title, meta)
     }
 
-    // ---------- 历史上的今天（维基百科精选） ----------
+    // ---------- 历史上的今天（可切换来源：维基 / 百度） ----------
+    fun getHistorySource(): String = prefs.getString(KEY_SOURCE, SOURCE_BAIDU) ?: SOURCE_BAIDU
+
+    fun setHistorySource(source: String) {
+        prefs.edit().putString(KEY_SOURCE, source).apply()
+    }
+
     private fun fetchHistory(): List<String> {
         val cal = Calendar.getInstance()
         val mm = String.format("%02d", cal.get(Calendar.MONTH) + 1)
         val dd = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH))
+        return if (getHistorySource() == SOURCE_WIKI) fetchHistoryWiki(mm, dd)
+        else fetchHistoryBaidu(mm, dd)
+    }
+
+    /** 维基百科精选（境外源，国内需梯子）。Accept-Language: zh-Hans 转简体且更完整。 */
+    private fun fetchHistoryWiki(mm: String, dd: String): List<String> {
         val url = "https://zh.wikipedia.org/api/rest_v1/feed/onthisday/selected/$mm/$dd"
-        // Accept-Language: zh-Hans —— 转简体，且人名地名更完整
         val res = Http.getString(url, mapOf("Accept-Language" to "zh-Hans"))
         val arr = JSONObject(res).optJSONArray("selected") ?: return emptyList()
         val items = ArrayList<Pair<Int, String>>()
         for (i in 0 until arr.length()) {
             val e = arr.getJSONObject(i)
-            val year = e.optInt("year")
             val text = e.optString("text")
-            if (text.isNotBlank()) items.add(Pair(year, truncate(text)))
+            if (text.isNotBlank()) items.add(e.optInt("year") to truncate(text))
         }
-        // 年份最近的 HISTORY_COUNT 条
         return items.sortedByDescending { it.first }
             .take(HISTORY_COUNT)
             .map { "${it.first}　${it.second}" }
     }
+
+    /** 百度百科历史上的今天（国内可直连）。只取“事件”类，剔除出生/逝世，标题去 HTML 标签。 */
+    private fun fetchHistoryBaidu(mm: String, dd: String): List<String> {
+        val url = "https://baike.baidu.com/cms/home/eventsOnHistory/$mm.json"
+        val res = Http.getString(url, mapOf("User-Agent" to "Mozilla/5.0"))
+        val day = JSONObject(res).optJSONObject(mm)?.optJSONArray(mm + dd) ?: return emptyList()
+        val items = ArrayList<Pair<Int, String>>()
+        for (i in 0 until day.length()) {
+            val e = day.getJSONObject(i)
+            if (e.optString("type") != "event") continue
+            val year = e.optString("year").toIntOrNull() ?: continue
+            val title = stripHtml(e.optString("title"))
+            if (title.isNotBlank()) items.add(year to truncate(title))
+        }
+        return items.sortedByDescending { it.first }
+            .take(HISTORY_COUNT)
+            .map { "${it.first}　${it.second}" }
+    }
+
+    private fun stripHtml(s: String): String =
+        s.replace(Regex("<[^>]*>"), "").replace("&nbsp;", " ").trim()
 
     /** 事件太长会撑破静态图排版，超过 MAX_EVENT_LEN 截断。 */
     private fun truncate(s: String): String =
@@ -104,6 +134,11 @@ class Repository(context: Context) {
     }
 
     companion object {
+        // 历史来源可选值；默认百度（国内可直连）
+        const val SOURCE_WIKI = "wiki"
+        const val SOURCE_BAIDU = "baidu"
+        private const val KEY_SOURCE = "history_source"
+
         // 历史上的今天显示条数（真实事件每条约 30~40 字、在屏上换成 2 行）
         const val HISTORY_COUNT = 3
 
