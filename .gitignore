@@ -1,0 +1,20 @@
+# Gradle 编译产物
+.gradle/
+build/
+app/build/
+
+# Android Studio / IntelliJ 的本地文件（每台机器不一样，不进仓库）
+.idea/
+*.iml
+captures/
+
+# 本地 SDK 路径配置（每台机器不一样）
+local.properties
+
+# 签名密钥（绝对不要提交！）
+*.jks
+*.keystore
+
+# 系统杂项
+.DS_Store
+Thumbs.db

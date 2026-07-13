@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">每日一屏</string>
+    <string name="btn_perm">授权存储</string>
+    <string name="btn_generate">立即生成</string>
+</resources>
