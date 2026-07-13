@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateStatus() {
         status.text = if (hasAllFilesAccess())
-            "已授权。点「立即生成」写入：${ImageGenerator.targetFile().absolutePath}"
+            "已授权。点「立即生成」写入目录：${ImageGenerator.targetDir().absolutePath}（每次新文件名）"
         else
             "未授权存储：先点「授权存储」开启「所有文件访问」权限。"
     }
