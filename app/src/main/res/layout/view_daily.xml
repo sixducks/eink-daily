@@ -1,106 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 一整屏排版：大日期 / Bing 灰度横幅 / 全诗(居中) / 历史上的今天(3条,悬挂缩进) / 更新时间
-     纯黑白高对比、大留白，专为墨水屏优化。 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 一整屏排版：日期 / Bing 灰度横幅 / 全诗(居中,自动缩放) / 历史上的今天 / 更新时间
+     用 LinearLayout 权重把“更新于”钉在最底部：历史区占剩余空间，内容超长时裁历史而非裁页脚。 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:padding="32dp">
 
-    <LinearLayout
+    <!-- 日期：右上角小字 -->
+    <TextView
+        android:id="@+id/tvDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="32dp">
+        android:gravity="end"
+        android:letterSpacing="0.03"
+        android:textColor="#000000"
+        android:textSize="18sp" />
 
-        <!-- 日期：右上角小字 -->
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:letterSpacing="0.03"
-            android:textColor="#000000"
-            android:textSize="18sp" />
+    <ImageView
+        android:id="@+id/ivBing"
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:layout_marginTop="16dp"
+        android:background="#EEEEEE"
+        android:contentDescription="Bing"
+        android:scaleType="centerCrop" />
 
-        <ImageView
-            android:id="@+id/ivBing"
-            android:layout_width="match_parent"
-            android:layout_height="260dp"
-            android:layout_marginTop="16dp"
-            android:background="#EEEEEE"
-            android:contentDescription="Bing"
-            android:scaleType="centerCrop" />
+    <TextView
+        android:id="@+id/tvBingCaption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="#555555"
+        android:textSize="12sp"
+        android:textStyle="italic" />
 
-        <TextView
-            android:id="@+id/tvBingCaption"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="#555555"
-            android:textSize="12sp"
-            android:textStyle="italic" />
+    <!-- 诗词：居中，字号在代码里按字数自动缩放 -->
+    <TextView
+        android:id="@+id/tvPoem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:fontFamily="serif"
+        android:gravity="center_horizontal"
+        android:lineSpacingMultiplier="1.4"
+        android:textColor="#000000"
+        android:textSize="36sp" />
 
-        <!-- 诗词：居中、更大字号与行距 -->
-        <TextView
-            android:id="@+id/tvPoem"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="serif"
-            android:gravity="center_horizontal"
-            android:lineSpacingMultiplier="1.4"
-            android:textColor="#000000"
-            android:textSize="36sp" />
+    <TextView
+        android:id="@+id/tvPoemMeta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:fontFamily="serif"
+        android:gravity="center_horizontal"
+        android:textColor="#444444"
+        android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/tvPoemMeta"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:fontFamily="serif"
-            android:gravity="center_horizontal"
-            android:textColor="#444444"
-            android:textSize="16sp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="24dp"
+        android:alpha="0.25"
+        android:background="#000000" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="24dp"
-            android:alpha="0.25"
-            android:background="#000000" />
+    <!-- 历史区标题：眉标 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:letterSpacing="0.12"
+        android:text="历史上的今天"
+        android:textColor="#555555"
+        android:textSize="15sp" />
 
-        <!-- 历史区标题降为“眉标”，与正文拉开层级 -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:letterSpacing="0.12"
-            android:text="历史上的今天"
-            android:textColor="#555555"
-            android:textSize="15sp" />
+    <!-- 历史正文：占据剩余空间（超长自动裁掉底部，保住页脚） -->
+    <TextView
+        android:id="@+id/tvHistory"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="14dp"
+        android:breakStrategy="simple"
+        android:hyphenationFrequency="none"
+        android:lineSpacingMultiplier="1.3"
+        android:textColor="#000000"
+        android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/tvHistory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:breakStrategy="simple"
-            android:hyphenationFrequency="none"
-            android:lineSpacingMultiplier="1.3"
-            android:textColor="#000000"
-            android:textSize="18sp" />
+    <!-- 更新时间：钉在最底部，始终可见 -->
+    <TextView
+        android:id="@+id/tvUpdated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:textColor="#666666"
+        android:textSize="12sp" />
 
-        <TextView
-            android:id="@+id/tvUpdated"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="end"
-            android:textColor="#666666"
-            android:textSize="12sp" />
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

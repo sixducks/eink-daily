@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateStatus() {
         status.text = if (hasAllFilesAccess())
-            "已授权。点「立即生成」写入目录：${ImageGenerator.targetDir().absolutePath}（每次新文件名）"
+            "已授权。点「立即生成」写入：${ImageGenerator.targetFile().absolutePath}"
         else
             "未授权存储：先点「授权存储」开启「所有文件访问」权限。"
     }
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         scope.launch {
             val file = ImageGenerator.generate(this@MainActivity)
             status.text = if (file != null)
-                "已生成：${file.name}\n去掌阅：设置→设备→屏幕显示→屏保→本地屏保→选「轮播」。以后每天自动换新图。"
+                "已生成：${file.name}\n掌阅不热替换：更新后需到 设置→设备→屏幕显示→屏保→本地屏保 重新选中 daily.png 才生效。"
             else
                 "生成失败：检查网络与存储权限后重试。"
             // 同步刷新预览
