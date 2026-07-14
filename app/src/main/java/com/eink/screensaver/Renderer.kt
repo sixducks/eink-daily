@@ -7,7 +7,6 @@ import android.graphics.ColorMatrixColorFilter
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.LeadingMarginSpan
-import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -41,37 +40,17 @@ object Renderer {
             else "更新于 " + SimpleDateFormat("HH:mm", Locale.CHINA).format(Date(c.updatedAt))
     }
 
-    /** 诗词：按字数自动缩放字号——短诗大而醒目，长词自动缩小，保证放得下不顶掉历史。 */
+    /** 诗词：字号交给布局的 autoSize 在固定区域内自动缩放。 */
     private fun bindPoem(tv: TextView, poem: String) {
-        val text = poem.ifBlank { "—" }
-        tv.text = text
-        val len = text.replace("\n", "").length
-        val sizeSp = when {
-            len <= 16 -> 34f   // 短句/五绝一联
-            len <= 28 -> 30f   // 七绝
-            len <= 44 -> 26f
-            len <= 64 -> 22f   // 七律级
-            len <= 90 -> 19f
-            else -> 16f        // 超长慢词
-        }
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+        tv.text = poem.ifBlank { "—" }
     }
 
-    /** 历史条目：圆点 + 悬挂缩进；并按总字数自动缩放字号，长内容自动缩小尽量不被裁。 */
+    /** 历史条目：圆点 + 悬挂缩进；字号交给布局的 autoSize 在固定区域内自动缩放。 */
     private fun bindHistory(tv: TextView, history: List<String>) {
         if (history.isEmpty()) {
             tv.text = ""
             return
         }
-        val total = history.sumOf { it.length }
-        val sizeSp = when {
-            total <= 90 -> 18f
-            total <= 130 -> 16f
-            total <= 170 -> 15f
-            else -> 14f
-        }
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
-
         val bullet = "· "
         val indent = tv.paint.measureText(bullet).toInt()
         val sb = SpannableStringBuilder()
