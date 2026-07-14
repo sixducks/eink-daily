@@ -68,6 +68,17 @@
             </RadioGroup>
         </LinearLayout>
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swAuto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="6dp"
+            android:text="每天自动刷新屏保（关：用掌阅自带系统日历）"
+            android:textColor="#333333"
+            android:textSize="14sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

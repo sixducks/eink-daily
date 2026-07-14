@@ -57,12 +57,21 @@ object Renderer {
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
     }
 
-    /** 历史条目：圆点 + 悬挂缩进，换行的第二行对齐在正文下、不顶到圆点。 */
+    /** 历史条目：圆点 + 悬挂缩进；并按总字数自动缩放字号，长内容自动缩小尽量不被裁。 */
     private fun bindHistory(tv: TextView, history: List<String>) {
         if (history.isEmpty()) {
             tv.text = ""
             return
         }
+        val total = history.sumOf { it.length }
+        val sizeSp = when {
+            total <= 90 -> 18f
+            total <= 130 -> 16f
+            total <= 170 -> 15f
+            else -> 14f
+        }
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+
         val bullet = "· "
         val indent = tv.paint.measureText(bullet).toInt()
         val sb = SpannableStringBuilder()

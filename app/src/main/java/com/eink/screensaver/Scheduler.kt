@@ -15,6 +15,7 @@ object Scheduler {
     private const val PREFS = "eink_daily"
     private const val KEY_HOUR = "refresh_hour"
     private const val KEY_MIN = "refresh_min"
+    private const val KEY_AUTO = "auto_enabled"
     private const val PERIODIC_NAME = "eink_daily_periodic"
 
     const val DEFAULT_HOUR = 7
@@ -23,10 +24,24 @@ object Scheduler {
     fun getHour(ctx: Context): Int = prefs(ctx).getInt(KEY_HOUR, DEFAULT_HOUR)
     fun getMinute(ctx: Context): Int = prefs(ctx).getInt(KEY_MIN, DEFAULT_MIN)
 
-    /** 设定每天刷新时间并立即重排任务。 */
+    /** 设定每天刷新时间并按开关状态重排任务。 */
     fun setTime(ctx: Context, hour: Int, minute: Int) {
         prefs(ctx).edit().putInt(KEY_HOUR, hour).putInt(KEY_MIN, minute).apply()
-        scheduleDaily(ctx)
+        applySchedule(ctx)
+    }
+
+    /** 自动刷新总开关。关：不再覆盖，掌阅每天 00:00 恢复自带系统日历。 */
+    fun isAutoEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AUTO, true)
+
+    fun setAutoEnabled(ctx: Context, enabled: Boolean) {
+        prefs(ctx).edit().putBoolean(KEY_AUTO, enabled).apply()
+        applySchedule(ctx)
+    }
+
+    /** 按开关状态启用或取消每日任务。 */
+    fun applySchedule(ctx: Context) {
+        if (isAutoEnabled(ctx)) scheduleDaily(ctx)
+        else WorkManager.getInstance(ctx).cancelUniqueWork(PERIODIC_NAME)
     }
 
     /**

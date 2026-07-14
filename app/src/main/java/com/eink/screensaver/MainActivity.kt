@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import com.eink.screensaver.data.Repository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -78,12 +79,23 @@ class MainActivity : AppCompatActivity() {
             }, Scheduler.getHour(this), Scheduler.getMinute(this), true).show()
         }
 
+        // 自动刷新总开关
+        val swAuto = findViewById<SwitchCompat>(R.id.swAuto)
+        swAuto.isChecked = Scheduler.isAutoEnabled(this)
+        swAuto.setOnCheckedChangeListener { _, checked ->
+            Scheduler.setAutoEnabled(this, checked)
+            status.text = if (checked)
+                "已开启每天自动刷新（覆盖系统日历屏保）。"
+            else
+                "已关闭：不再自动覆盖，掌阅将在每天 00:00 恢复自带系统日历。"
+        }
+
         // 打开先显示缓存，没有就拉一次填充预览
         val cached = repo.cached()
         if (cached != null) Renderer.bindText(preview, cached) else refreshPreview()
 
-        // 顺手把每日定时任务排上
-        Scheduler.scheduleDaily(this)
+        // 按开关状态安排每日任务
+        Scheduler.applySchedule(this)
     }
 
     override fun onResume() {
@@ -125,7 +137,7 @@ class MainActivity : AppCompatActivity() {
         scope.launch {
             val file = ImageGenerator.generate(this@MainActivity)
             status.text = if (file != null)
-                "已生成：${file.name}\n掌阅不热替换：更新后需到 设置→设备→屏幕显示→屏保→本地屏保 重新选中 daily.png 才生效。"
+                "已覆盖系统日历屏保：${file.name}\n屏保设置里选「系统日历」，然后息屏验证是否显示本图。"
             else
                 "生成失败：检查网络与存储权限后重试。"
             // 同步刷新预览
