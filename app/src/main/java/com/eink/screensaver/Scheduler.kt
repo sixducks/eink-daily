@@ -30,7 +30,7 @@ object Scheduler {
         applySchedule(ctx)
     }
 
-    /** 自动刷新总开关。关：不再覆盖，掌阅每天 00:00 恢复自带系统日历。 */
+    /** 自动生成总开关。关：不再每天后台生成 daily.png。 */
     fun isAutoEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AUTO, true)
 
     fun setAutoEnabled(ctx: Context, enabled: Boolean) {

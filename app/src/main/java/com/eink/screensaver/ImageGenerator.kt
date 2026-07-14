@@ -27,13 +27,11 @@ object ImageGenerator {
     const val W = 1264
     const val H = 1680
     private const val MAX_BYTES = 1_000_000
-    // 复用掌阅“系统日历”屏保：它本就每天 00:00 自动重写这个文件、并重新读取显示。
-    // 我们同名覆盖它，掌阅就会把我们的图当成当天日历屏保——有机会实现全自动刷新。
-    private const val FILE_NAME = "系统日历zh.jpg"
+    private const val FILE_NAME = "daily.png"
 
-    /** 掌阅“系统日历”屏保目录。 */
+    /** 掌阅本地屏保目录。 */
     fun targetDir(): File =
-        File(Environment.getExternalStorageDirectory(), "iReader/skins/系统日历")
+        File(Environment.getExternalStorageDirectory(), "iReader/skins/本地屏保")
 
     fun targetFile(): File = File(targetDir(), FILE_NAME)
 
@@ -76,23 +74,29 @@ object ImageGenerator {
         return out
     }
 
-    /** 写 JPG（同名覆盖 系统日历zh.jpg），保证 <1MB：从高质量起，超限就降质量重试。 */
+    /** 写 PNG（同名覆盖 daily.png），保证 <1MB：PNG 无损，超限就整体等比缩小重试。 */
     private fun save(context: Context, src: Bitmap): File? {
         val dir = targetDir()
         if (!dir.exists() && !dir.mkdirs()) return null
         val file = targetFile()
 
-        for (quality in intArrayOf(92, 85, 78, 70, 60)) {
+        var scale = 1.0
+        repeat(6) {
+            val bmp = if (scale >= 1.0) src
+            else Bitmap.createScaledBitmap(src, (W * scale).toInt(), (H * scale).toInt(), true)
             val bos = ByteArrayOutputStream()
-            src.compress(Bitmap.CompressFormat.JPEG, quality, bos)
-            if (bos.size() <= MAX_BYTES) {
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, bos)
+            val size = bos.size()
+            if (bmp !== src) bmp.recycle()
+            if (size <= MAX_BYTES) {
                 file.writeBytes(bos.toByteArray())
                 // 通知系统媒体库，图库/文件管理器立即刷新
                 MediaScannerConnection.scanFile(
-                    context, arrayOf(file.absolutePath), arrayOf("image/jpeg"), null
+                    context, arrayOf(file.absolutePath), arrayOf("image/png"), null
                 )
                 return file
             }
+            scale *= 0.85
         }
         return null
     }

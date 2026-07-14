@@ -85,9 +85,9 @@ class MainActivity : AppCompatActivity() {
         swAuto.setOnCheckedChangeListener { _, checked ->
             Scheduler.setAutoEnabled(this, checked)
             status.text = if (checked)
-                "已开启每天自动刷新（覆盖系统日历屏保）。"
+                "已开启每天自动生成（后台把当天图备好，手动重选即可）。"
             else
-                "已关闭：不再自动覆盖，掌阅将在每天 00:00 恢复自带系统日历。"
+                "已关闭自动生成。想更新时点「立即生成」。"
         }
 
         // 打开先显示缓存，没有就拉一次填充预览
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
         scope.launch {
             val file = ImageGenerator.generate(this@MainActivity)
             status.text = if (file != null)
-                "已覆盖系统日历屏保：${file.name}\n屏保设置里选「系统日历」，然后息屏验证是否显示本图。"
+                "已生成：${file.name}\n到 设置→设备→屏幕显示→屏保→本地屏保，选中/重选 daily.png 生效。"
             else
                 "生成失败：检查网络与存储权限后重试。"
             // 同步刷新预览

@@ -75,7 +75,7 @@
             android:checked="true"
             android:paddingHorizontal="16dp"
             android:paddingVertical="6dp"
-            android:text="每天自动刷新屏保（关：用掌阅自带系统日历）"
+            android:text="每天自动生成本地屏保图（后台备好当天图）"
             android:textColor="#333333"
             android:textSize="14sp" />
 
